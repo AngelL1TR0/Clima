@@ -12,7 +12,7 @@ WeatherApp es una aplicación de línea de comandos que te permite obtener la te
 1. Clona este repositorio o descarga los archivos del proyecto.
 2. Abre el proyecto en tu IDE de Java favorito.
 3. Abre el archivo `Main.java`.
-4. Reemplaza `"TU_CLAVE_DE_API"` con tu propia clave de API de OpenWeatherMap en la variable `API_KEY`.
+4. Reemplaza con tu propia clave de API de OpenWeatherMap en la variable `API_KEY`.
 5. Guarda los cambios.
 6. Compila y ejecuta la aplicación.
 
