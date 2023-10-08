@@ -1,4 +1,5 @@
 package org.example;
+
 import com.google.gson.Gson;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -6,21 +7,31 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Esta clase muestra la temperatura actual y el pronóstico para los próximos 5 días
+ * de una ciudad ingresada por el usuario utilizando la API de OpenWeatherMap.
+ */
 public class Main {
+
     private static final String API_KEY = "ca6fa12599a3c704cde9cf32b1de0199";
     private static final String BASE_URL = "https://api.openweathermap.org/data/2.5/";
 
+    /**
+     * El método principal del programa.
+     *
+     * @param args Argumentos de línea de comandos (no se utilizan).
+     */
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
-        System.out.println("Introduce el nombre de la ciudad que quieras");
+        System.out.println("Introduce el nombre de la ciudad que quieras:");
         String city = sc.nextLine();
-
-
         try {
             HttpClient httpClient = HttpClients.createDefault();
 
@@ -36,6 +47,9 @@ public class Main {
             double currentTemperatureInKelvin = currentData.getMain().getTemp();
             double currentTemperatureInCelsius = currentTemperatureInKelvin - 273.15;
 
+            // Muestra la temperatura actual
+            System.out.println("Temperatura actual en " + city + ": " + decimalFormat.format(currentTemperatureInCelsius) + "°C");
+
             // Realiza una solicitud para obtener el pronóstico de 5 días
             HttpGet forecastRequest = new HttpGet(BASE_URL + "forecast?q=" + city + "&appid=" + API_KEY);
             String forecastResponse = EntityUtils.toString(httpClient.execute(forecastRequest).getEntity());
@@ -43,40 +57,32 @@ public class Main {
             // Procesa la respuesta JSON para obtener el pronóstico de 5 días
             WeatherForecastData forecastData = gson.fromJson(forecastResponse, WeatherForecastData.class);
 
-            // Convierte la temperatura de Kelvin a Celsius para el pronóstico de los próximos 5 días
-            DecimalFormat decimalFormat = new DecimalFormat("0.00");
+            // Muestra el pronóstico para los siguientes 5 días naturales
+            System.out.println("Pronóstico para los siguientes 5 días naturales:");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Calendar calendar = Calendar.getInstance();
+            List<String> displayedDates = new ArrayList<>();
 
-            // Muestra la temperatura actual
-            System.out.println("Temperatura actual en " + city + ": " + decimalFormat.format(currentTemperatureInCelsius) + "°C");
-
-            // Filtra y muestra el pronóstico para los próximos 5 días
-            System.out.println("Pronóstico para los próximos 5 días:");
-            List<WeatherForecastData.ForecastItem> dailyForecasts = filterDailyForecasts(forecastData.getList());
-            for (WeatherForecastData.ForecastItem forecastItem : dailyForecasts) {
-                String date = forecastItem.getDtTxt();
+            for (WeatherForecastData.ForecastItem forecastItem : forecastData.getList()) {
+                String date = forecastItem.getDtTxt().split(" ")[0];
                 double temperatureInKelvin = forecastItem.getMain().getTemp();
                 double temperatureInCelsius = temperatureInKelvin - 273.15;
-                System.out.println(date + ": " + decimalFormat.format(temperatureInCelsius) + "°C");
+
+                // Verifica si la fecha ya se ha mostrado
+                if (!displayedDates.contains(date)) {
+                    System.out.println(date + ": " + decimalFormat.format(temperatureInCelsius) + "°C");
+                    displayedDates.add(date);
+                }
+
+                // Si se han mostrado 5 fechas, sal del bucle
+                if (displayedDates.size() >= 5) {
+                    break;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // Método para filtrar pronósticos diarios
-    private static List<WeatherForecastData.ForecastItem> filterDailyForecasts(List<WeatherForecastData.ForecastItem> forecasts) {
-        List<WeatherForecastData.ForecastItem> dailyForecasts = new ArrayList<>();
-        String currentDate = null;
-
-        for (WeatherForecastData.ForecastItem forecastItem : forecasts) {
-            String date = forecastItem.getDtTxt().split(" ")[0]; // Obtiene la fecha sin la hora
-
-            if (!date.equals(currentDate)) {
-                dailyForecasts.add(forecastItem);
-                currentDate = date;
-            }
-        }
-
-        return dailyForecasts;
-    }
+    private static DecimalFormat decimalFormat = new DecimalFormat("0.00");
 }
