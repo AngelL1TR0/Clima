@@ -7,9 +7,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Scanner;
 
@@ -20,7 +18,7 @@ import java.util.Scanner;
 public class Main {
 
     private static final String API_KEY = "ca6fa12599a3c704cde9cf32b1de0199";
-    private static final String BASE_URL = "https://api.openweathermap.org/data/2.5/";
+    private static final String URL = "https://api.openweathermap.org/data/2.5/";
 
     /**
      * El método principal del programa.
@@ -30,52 +28,51 @@ public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
+        //Se pide nombre de la ciudad por consola
         System.out.println("Introduce el nombre de la ciudad que quieras:");
-        String city = sc.nextLine();
+        String ciudad = sc.nextLine();
         try {
             HttpClient httpClient = HttpClients.createDefault();
 
             // Realiza una solicitud para obtener la temperatura actual
-            HttpGet currentWeatherRequest = new HttpGet(BASE_URL + "weather?q=" + city + "&appid=" + API_KEY);
-            String currentWeatherResponse = EntityUtils.toString(httpClient.execute(currentWeatherRequest).getEntity());
+            HttpGet openWheather = new HttpGet(URL + "weather?q=" + ciudad + "&appid=" + API_KEY);
+            String respuestaTiempo = EntityUtils.toString(httpClient.execute(openWheather).getEntity());
 
             // Procesa la respuesta JSON para obtener la temperatura actual
             Gson gson = new Gson();
-            WeatherCurrentData currentData = gson.fromJson(currentWeatherResponse, WeatherCurrentData.class);
+            WeatherCurrentData tiempoActuall = gson.fromJson(respuestaTiempo, WeatherCurrentData.class);
 
             // Convierte la temperatura de Kelvin a Celsius
-            double currentTemperatureInKelvin = currentData.getMain().getTemp();
-            double currentTemperatureInCelsius = currentTemperatureInKelvin - 273.15;
+            double tiempoEnKelvin = tiempoActuall.getMain().getTemp();
+            double tiempoEnGrados = tiempoEnKelvin - 273.15;
 
             // Muestra la temperatura actual
-            System.out.println("Temperatura actual en " + city + ": " + decimalFormat.format(currentTemperatureInCelsius) + "°C");
+            System.out.println("Temperatura actual en " + ciudad + ": " + decimalFormat.format(tiempoEnGrados) + "°C");
 
             // Realiza una solicitud para obtener el pronóstico de 5 días
-            HttpGet forecastRequest = new HttpGet(BASE_URL + "forecast?q=" + city + "&appid=" + API_KEY);
-            String forecastResponse = EntityUtils.toString(httpClient.execute(forecastRequest).getEntity());
+            HttpGet pronostico = new HttpGet(URL + "forecast?q=" + ciudad + "&appid=" + API_KEY);
+            String respuestaPronostico = EntityUtils.toString(httpClient.execute(pronostico).getEntity());
 
             // Procesa la respuesta JSON para obtener el pronóstico de 5 días
-            WeatherForecastData forecastData = gson.fromJson(forecastResponse, WeatherForecastData.class);
+            WeatherForecastData pronosticoJson = gson.fromJson(respuestaPronostico, WeatherForecastData.class);
 
             // Muestra el pronóstico para los siguientes 5 días naturales
             System.out.println("Pronóstico para los siguientes 5 días naturales:");
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            Calendar calendar = Calendar.getInstance();
-            List<String> displayedDates = new ArrayList<>();
+            List<String> lista = new ArrayList<>();
 
-            for (WeatherForecastData.ForecastItem forecastItem : forecastData.getList()) {
-                String date = forecastItem.getDtTxt().split(" ")[0];
-                double temperatureInKelvin = forecastItem.getMain().getTemp();
-                double temperatureInCelsius = temperatureInKelvin - 273.15;
+            for (WeatherForecastData.ForecastItem forecastItem : pronosticoJson.getList()) {
+                String fecha = forecastItem.getDtTxt().split(" ")[0];
+                double temperaturaKelvin = forecastItem.getMain().getTemp();
+                double temperaturaEnGrados = temperaturaKelvin - 273.15;
 
                 // Verifica si la fecha ya se ha mostrado
-                if (!displayedDates.contains(date)) {
-                    System.out.println(date + ": " + decimalFormat.format(temperatureInCelsius) + "°C");
-                    displayedDates.add(date);
+                if (!lista.contains(fecha)) {
+                    System.out.println(fecha + ": " + decimalFormat.format(temperaturaEnGrados) + "°C");
+                    lista.add(fecha);
                 }
 
                 // Si se han mostrado 5 fechas, sal del bucle
-                if (displayedDates.size() >= 5) {
+                if (lista.size() >= 5) {
                     break;
                 }
             }
