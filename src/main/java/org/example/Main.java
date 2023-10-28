@@ -17,7 +17,6 @@ import java.util.Scanner;
  */
 public class Main {
 
-    private static final String API_KEY = "ca6fa12599a3c704cde9cf32b1de0199";
     private static final String URL = "https://api.openweathermap.org/data/2.5/";
 
     /**
@@ -35,7 +34,7 @@ public class Main {
             HttpClient httpClient = HttpClients.createDefault();
 
             // Realiza una solicitud para obtener la temperatura actual
-            HttpGet openWheather = new HttpGet(URL + "weather?q=" + ciudad + "&appid=" + API_KEY);
+            HttpGet openWheather = new HttpGet(URL + "weather?q=" + ciudad + "&appid=" + Utils.API_KEY);
             String respuestaTiempo = EntityUtils.toString(httpClient.execute(openWheather).getEntity());
 
             // Procesa la respuesta JSON para obtener la temperatura actual
@@ -50,7 +49,7 @@ public class Main {
             System.out.println("Temperatura actual en " + ciudad + ": " + decimalFormat.format(tiempoEnGrados) + "°C");
 
             // Realiza una solicitud para obtener el pronóstico de 5 días
-            HttpGet pronostico = new HttpGet(URL + "forecast?q=" + ciudad + "&appid=" + API_KEY);
+            HttpGet pronostico = new HttpGet(URL + "forecast?q=" + ciudad + "&appid=" + Utils.API_KEY);
             String respuestaPronostico = EntityUtils.toString(httpClient.execute(pronostico).getEntity());
 
             // Procesa la respuesta JSON para obtener el pronóstico de 5 días
